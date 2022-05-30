@@ -1,0 +1,85 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: currency-api-active-mq
+  name: active-mq-brocker
+
+spec:
+  ports:
+    - name: active-mq-brocker-port
+      port: 61616
+      targetPort: 61616
+    - name: active-mq-brocker-admin
+      port: 8161
+      protocol: TCP
+      targetPort: 8161
+  type: ClusterIP
+  selector:
+    app: currency-api-active-mq
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: active-mq
+spec:
+  updateStrategy:
+    type: RollingUpdate
+
+  selector:
+    matchLabels:
+      app: currency-api-active-mq
+      type: currency-api-active-mq
+
+  serviceName: active-mq
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: currency-api-active-mq
+        type: currency-api-active-mq
+    spec:
+      terminationGracePeriodSeconds: 10
+
+      containers:
+        - name: active-mq
+          image: webcenter/activemq
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 61616
+              name: active-mq
+            - containerPort: 8161
+              name: active-mq-admin
+          env:
+            - name: ACTIVEMQ_ADMIN_LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: active-mq-credentials
+                  key: active_mq_user
+            - name: ACTIVEMQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: active-mq-credentials
+                  key: active_mq_password
+
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+
+          volumeMounts:
+            - mountPath: /data
+              name: active-mq-data
+              subPath: active-mq-data
+
+
+  volumeClaimTemplates:
+    - metadata:
+        name: active-mq-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 3Gi

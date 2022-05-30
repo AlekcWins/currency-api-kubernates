@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: currency-api
+  labels:
+    app: currency-api
+spec:
+  ports:
+    - port: 80
+      targetPort: 8081
+      protocol: TCP
+  selector:
+    app: currency-api

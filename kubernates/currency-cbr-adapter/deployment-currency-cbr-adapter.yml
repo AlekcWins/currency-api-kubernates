@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency-cbr-adapter
+spec:
+  selector:
+    matchLabels:
+      app: currency-cbr-adapter
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: currency-cbr-adapter
+    spec:
+      containers:
+        - name: currency-cbr-adapter
+          image: anenahov/currency-cbr-adapter:1.0.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ACTIVE_MQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: active-mq-conf
+                  key: host
+            - name: ACTIVE_MQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: active-mq-conf
+                  key: port
+            - name: ACTIVE_MQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: active-mq-credentials
+                  key: active_mq_user
+            - name: ACTIVE_MQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: active-mq-credentials
+                  key: active_mq_password
