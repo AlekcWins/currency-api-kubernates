@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: active-mq-conf
+data:
+  host: "active-mq-brocker"
+  port: "61616"

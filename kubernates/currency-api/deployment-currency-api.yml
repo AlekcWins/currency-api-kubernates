@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency-api
+spec:
+  selector:
+    matchLabels:
+      app: currency-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: currency-api
+    spec:
+      containers:
+        - name: currency-api
+          image: anenahov/currency-api:1.0.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-conf
+                  key: host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-conf
+                  key: port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-conf
+                  key: name
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres_password
+            - name: ACTIVE_MQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: active-mq-conf
+                  key: host
+            - name: ACTIVE_MQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: active-mq-conf
+                  key: port
+            - name: ACTIVE_MQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: active-mq-credentials
+                  key: active_mq_user
+            - name: ACTIVE_MQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: active-mq-credentials
+                  key: active_mq_password
